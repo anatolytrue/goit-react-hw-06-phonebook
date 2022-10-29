@@ -1,33 +1,40 @@
-import PropTypes from 'prop-types'
-import css from './ContactList.module.css'
-// import { useSelector } from "react-redux";
-// import { getContacts, getFilter } from 'redux/selectors';
+import { useSelector, useDispatch } from 'react-redux';
+import css from './ContactList.module.css';
+import { deleteContact } from 'redux/contactsSlice';
+import {getFilter, getContacts} from 'redux/selectors'
 
+function ContactList() {
 
-const ContactList = ({ contacts, onDeleteContact }) => (
+    const contacts = useSelector(getContacts);
+    const filter = useSelector(getFilter);
+    const dispatch = useDispatch();
     
-    <ul className={css.phonebookContactList}>
-        {contacts.map(({ id, name, number}) => (
+    const getVisibleContacts = () => {
+        const normalizedFilter = filter.toLowerCase().trim();
+        return contacts.filter(contact =>
+            contact.name.toLowerCase().includes(normalizedFilter))
+    }
+    const handleDeleteContact = contactId => {
+        dispatch(deleteContact(contactId))
+    }
+
+    const contactsList = getVisibleContacts();
+
+    return (
+        <ul className={css.phonebookContactList}>
+        {contactsList.map(({ id, name, number }) => (
             <li key={id} className={css.phonebookContactListItem}>
-                <p>{name} : { number}</p>
+                <p>{name} : {number}</p>
                 <button type="button"
-                    onClick={() => onDeleteContact(id)}
+                    onClick={() => handleDeleteContact(id)}
                     className={css.phonebookContactListBtn}>
-                Delete
+                    Delete
                 </button>
             </li>
             
-            ))}
+        ))}
     </ul>
-) 
-
-ContactList.propTypes = {
-    contacts: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        number: PropTypes.string.isRequired
-    })),
-    onDeleteContact: PropTypes.func.isRequired,
+    )
 }
 
 export default ContactList;
